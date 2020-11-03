@@ -1,20 +1,21 @@
-/********** DOM Elements **********/ 
+// ANCHOR DOM Elements
 
 const quoteList = document.querySelector("#quote-list")
 const newQuoteForm = document.querySelector("#new-quote-form")
 
-/********** Event Listeners **********/
-
-quoteList.addEventListener("click", event => {
-	if (event.target.matches(".btn-success")) {
-		handleAddLikeToQuote(event)
-	} else if (event.target.matches(".btn-danger")){
-		handleDeleteQuote(event)
-	}
-})
+// ANCHOR Event Listeners
+function clickListeners() {
+	document.addEventListener("click", event => {
+		if (event.target.matches(".btn-success")) {
+			handleAddLikeToQuote(event)
+		} else if (event.target.matches(".btn-danger")){
+			handleDeleteQuote(event)
+		}
+	})
+}
 newQuoteForm.addEventListener("submit", handleNewQuoteForm)
 
-/********** Event Handlers **********/ 
+// ANCHOR Event Handlers 
 
 function handleAddLikeToQuote(event) {
 	const span = event.target.firstElementChild
@@ -53,7 +54,7 @@ function handleDeleteQuote(event) {
 
 function handleNewQuoteForm(event) {
 	event.preventDefault()
-	
+
 	const quote = {
 		"quote": event.target.quote.value,
 		"author": event.target.author.value
@@ -70,14 +71,7 @@ function handleNewQuoteForm(event) {
 
 	fetch(`http://localhost:3000/quotes`, config)
 	.then(response => response.json())
-	.then(newQuoteObj => {
-		
-		countLikes(newQuoteObj.id)
-			.then(arrayOfLikes => {
-				const likes = arrayOfLikes.length
-				renderQuote(newQuoteObj, likes)
-			})
-	})
+	.then(newQuoteObj => renderQuote(newQuoteObj))
 
 	event.target.reset()
 }
@@ -87,19 +81,22 @@ function countLikes(quoteId) {
 		.then(response => response.json())
 }
 
-/********** Render Functions **********/
+// ANCHOR Render Functions
 
 function renderQuotes(quotesData) {
-	quotesData.forEach(quote => renderQuote(quote, quote.likes.length))
+	quotesData.forEach(quoteObj => renderQuote(quoteObj))
 }
 
-function renderQuote(quoteObj, likes) {
+function renderQuote(quoteObj) {
 	const author = quoteObj.author
 	const quote = quoteObj.quote
+	const id = quoteObj.id
+
+	let likes = quoteObj.likes ? quoteObj.likes.length : 0
 	
 	const li = document.createElement("li")
 	li.classList.add("quote-card")
-	li.dataset.id = quoteObj.id
+	li.dataset.id = id
 
 	const blockquote = document.createElement("blockquote")
 	blockquote.classList.add("blockquote")
@@ -127,7 +124,7 @@ function renderQuote(quoteObj, likes) {
 	quoteList.append(li)
 }
 
-/********** Initial Render **********/
+// ANCHOR Initial Render
 
 function initialize() {
 	fetch(`http://localhost:3000/quotes?_embed=likes`)
@@ -137,4 +134,6 @@ function initialize() {
 		})
 }
 
+//ANCHOR Function Calls
 initialize()
+clickListeners()
